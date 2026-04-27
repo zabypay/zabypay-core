@@ -175,11 +175,6 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
 before opening a PR. By contributing you agree that your code will be
 licensed under the MIT License.
 
-## Support
-
-- Issues / feature requests: <https://github.com/Parikalp-Bhardwaj/zabypay/issues>
-- Security disclosures (please do **not** open a public issue):
-  [parikalp.123@gmail.com](mailto:parikalp.123@gmail.com)
 
 ---
 
