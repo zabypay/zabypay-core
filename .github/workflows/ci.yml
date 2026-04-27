@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  lint:
+    name: fmt + clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: System deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev libpq-dev
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      # The legacy code carries pre-existing warnings. We deny the
+      # correctness bucket and warn-allow the noisy buckets, plus a few
+      # specific lints that fire in legacy modules (TODO: clean these up
+      # and remove the per-lint allows).
+      - name: cargo clippy
+        run: |
+          cargo clippy --all-targets --workspace -- \
+            -D clippy::correctness \
+            -A dead_code \
+            -A unused_imports \
+            -A unused_variables \
+            -A unused_mut \
+            -A clippy::too_many_arguments \
+            -A clippy::module_inception \
+            -A clippy::large_enum_variant \
+            -A clippy::await_holding_refcell_ref \
+            -A clippy::useless_vec \
+            -A clippy::vec_init_then_push \
+            -A clippy::single_element_loop \
+            -A clippy::format_in_format_args \
+            -A clippy::cast_abs_to_unsigned \
+            -A clippy::redundant_clone
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: System deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev libpq-dev
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo build
+        run: cargo build --workspace --release
+
+  # Tests are not run yet: there is no integration-test suite that doesn't
+  # require a live Postgres + chain RPCs. Add a `test` job here once a
+  # hermetic test suite exists.
+
+  docker:
+    name: docker image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: zabypay:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

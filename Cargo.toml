@@ -1,0 +1,104 @@
+[package]
+name = "api-crypto"
+version = "0.1.0"
+edition = "2021"
+description = "ZabyPay - open-source multi-chain crypto payment gateway"
+license = "MIT"
+repository = "https://github.com/Parikalp-Bhardwaj/zabypay"
+readme = "README.md"
+
+[workspace]
+members = [".", "migration"]
+
+[dependencies]
+# Web framework
+actix-web = "4.0"
+actix = "0.13"
+actix-web-actors = "4.3"
+actix-cors = "0.7"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+futures = "0.3"
+futures-util = "0.3"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Common types
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+rust_decimal = { version = "1.32", features = ["serde"] }
+
+# Database
+sea-orm = { version = "1.0", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"] }
+sea-orm-migration = "1.0"
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls"] }
+
+# Validation
+validator = { version = "0.18", features = ["derive"] }
+
+# Auth / crypto primitives
+jsonwebtoken = "9.0"
+argon2 = "0.5"
+bcrypt = "0.15"
+sha2 = "0.10"
+sha3 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+base64 = "0.21"
+aes-gcm = "0.10"
+rand = "0.8"
+
+# Caching / messaging
+redis = "0.25"
+lapin = "2.3"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+regex = "1.10"
+urlencoding = "2.1"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Config
+dotenv = "0.15"
+lazy_static = "1.4"
+
+# Email
+lettre = { version = "0.11", default-features = false, features = ["builder", "smtp-transport", "tokio1-native-tls"] }
+
+# Bitcoin
+bitcoin = "0.32"
+secp256k1 = { version = "0.29", features = ["rand"] }
+bdk = { version = "0.30.2", features = ["keys-bip39"] }
+
+# Ethereum / EVM
+web3 = "0.19"
+ethers-signers = "2.0"
+
+# Solana
+solana-program = "2.0.0"
+solana-client = "2.0.0"
+solana-sdk = "2.0.1"
+
+# HD wallet derivation
+bip39 = { package = "tiny-bip39", version = "2.0.0" }
+slip10 = "0.3.0"
+ed25519-dalek = { version = "2.0.0", features = ["rand_core"] }
+bs58 = "0.5.1"
+
+# Errors
+anyhow = "1.0.99"
+
+[[bin]]
+name = "api-crypto"
+path = "src/main.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
