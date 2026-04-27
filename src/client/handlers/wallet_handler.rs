@@ -1,6 +1,6 @@
 use crate::client::models::wallet::WalletGenerationRequest;
-use crate::shared::models::temp_auth::UserClaims;
 use crate::shared::entities::{prelude::*, wallet};
+use crate::shared::models::temp_auth::UserClaims;
 use crate::shared::service::wallet::{Currency, WalletService};
 use crate::shared::utils::api_response::ApiResponse;
 use crate::shared::utils::errors::AppError;
@@ -104,7 +104,6 @@ pub async fn generate_wallet_handler(
         .generate_wallet(&claims.id, currency, &app_state.db)
         .await?;
 
-    
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "success": true,
         "message": "Wallet created successfully",
@@ -123,7 +122,6 @@ pub async fn get_wallets(
     req: HttpRequest,
 ) -> Result<HttpResponse, AppError> {
     println!("=== GET WALLETS HANDLER CALLED ===");
-
 
     let claims = req
         .extensions()
@@ -145,7 +143,7 @@ pub async fn get_wallets(
                 "id": w.id,
                 "address": w.address,
                 "currency": w.currency,
-                "balance": "0.00000000", 
+                "balance": "0.00000000",
                 "created_at": w.created_at
             })
         })

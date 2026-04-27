@@ -2,7 +2,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct ApiKeyResponse {
     pub id: String,
@@ -18,7 +17,6 @@ pub struct ApiKeyResponse {
     pub created_at: DateTime<Utc>,
 }
 
-
 #[derive(Debug, Clone, Deserialize, Validate)]
 pub struct UpdateApiKeyRequest {
     #[validate(length(
@@ -28,4 +26,3 @@ pub struct UpdateApiKeyRequest {
     ))]
     pub name: Option<String>,
 }
-

@@ -46,7 +46,6 @@ impl WalletService {
             .generate_wallet(user_id, currency, db)
             .await?;
 
-
         Ok(WalletResponse {
             address,
             currency: request.currency.to_uppercase(),

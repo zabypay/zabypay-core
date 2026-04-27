@@ -205,7 +205,7 @@ impl MultiWalletService {
                 matching_wallets.sort_by(|a, b| {
                     let a_balance: Decimal = a.available_balance.parse().unwrap_or_default();
                     let b_balance: Decimal = b.available_balance.parse().unwrap_or_default();
-                    b_balance.cmp(&a_balance) 
+                    b_balance.cmp(&a_balance)
                 });
             }
             "fifo" => {
@@ -244,7 +244,7 @@ impl MultiWalletService {
             let max_transferable = wallet_balance - estimated_fee;
 
             if max_transferable <= Decimal::ZERO {
-                continue; 
+                continue;
             }
 
             let amount_to_transfer = remaining_needed.min(max_transferable);
@@ -358,7 +358,6 @@ impl MultiWalletService {
         }
     }
 
-   
     pub async fn get_multi_wallet_balances(
         app_state: &AppState,
         merchant_id: &str,
@@ -401,7 +400,7 @@ impl MultiWalletService {
                 network: network_info.network.clone(),
                 symbol: network_info.symbol.clone(),
                 available: wallet_data.available_balance.clone(),
-                pending: "0".to_string(), 
+                pending: "0".to_string(),
                 total: wallet_data.available_balance.clone(),
                 usd_value: wallet_data.usd_value.clone().unwrap_or("0".to_string()),
                 decimals: network_info.decimals,
@@ -649,7 +648,7 @@ impl MultiWalletService {
         let master_withdrawal = withdrawal_request::ActiveModel {
             id: Set(master_withdrawal_id.clone()),
             merchant_id: Set(merchant_id.to_string()),
-            wallet_id: Set(primary_wallet_id.clone()), 
+            wallet_id: Set(primary_wallet_id.clone()),
             external_id: Set(request.external_id.unwrap_or_else(|| master_withdrawal_id.clone())),
             idempotency_key: Set(request.idempotency_key.clone()),
             environment: Set(request.environment.clone()),
@@ -839,7 +838,7 @@ impl MultiWalletService {
                         network: Self::extract_network(&wallet.currency),
                         available_balance: balance.available_balance.to_string(),
                         usd_value,
-                        payment_source_id: None, 
+                        payment_source_id: None,
                         created_at: wallet.created_at.into(),
                         last_transaction_at: Some(balance.last_updated.into()),
                     });
@@ -897,8 +896,7 @@ impl MultiWalletService {
             "fifo" => {
                 sorted_wallets.sort_by(|a, b| a.created_at.cmp(&b.created_at));
             }
-            "optimal" | _ => {
-            }
+            "optimal" | _ => {}
         }
 
         for wallet_data in sorted_wallets {
@@ -959,7 +957,7 @@ impl MultiWalletService {
 
         let withdrawal = withdrawal_request::ActiveModel {
             id: Set(withdrawal_id.clone()),
-            merchant_id: Set("auto".to_string()), 
+            merchant_id: Set("auto".to_string()),
             wallet_id: Set(wallet.id.clone()),
             external_id: Set(format!(
                 "{}_{}",
@@ -1060,15 +1058,15 @@ impl MultiWalletService {
                 environment: existing.environment,
                 to_address: existing.to_address,
                 requested_amount: existing.amount.to_string(),
-                requested_amount_type: "usd".to_string(), 
+                requested_amount_type: "usd".to_string(),
                 transferred_amount_usd: existing.net_amount.to_string(),
                 total_fees_usd: existing.fee.unwrap_or_default().to_string(),
                 net_amount_usd: existing.net_amount.to_string(),
                 status: existing.status,
-                wallets_used: 1, 
+                wallets_used: 1,
                 wallets_failed: 0,
                 tx_hashes: existing.tx_hash.into_iter().collect(),
-                transactions: vec![], 
+                transactions: vec![],
                 created_at: existing.created_at.into(),
                 processed_at: existing.processed_at.map(|dt| dt.into()),
                 confirmed_at: existing.confirmed_at.map(|dt| dt.into()),

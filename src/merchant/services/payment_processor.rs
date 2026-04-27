@@ -31,9 +31,7 @@ pub struct PaymentProcessor {
 
 impl PaymentProcessor {
     pub fn new(app_state: Arc<AppState>) -> Self {
-        Self {
-            app_state,
-        }
+        Self { app_state }
     }
 
     pub async fn process_payment(
@@ -55,7 +53,6 @@ impl PaymentProcessor {
                 "Payment is not in pending status".to_string(),
             ));
         }
-
 
         let fee_percentage = 0.001; // 0.1%
         let fee_amount = amount * fee_percentage;
@@ -137,7 +134,6 @@ impl PaymentProcessor {
         _amount: f64,
         _recipient_address: &str,
     ) -> Result<String, AppError> {
-        
         let transaction_hash = format!("0x{}", hex::encode(Uuid::new_v4().as_bytes()));
 
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
@@ -182,9 +178,9 @@ impl PaymentProcessor {
         Ok(json!({
             "merchant_id": merchant.id,
             "period_start": since,
-            "total_payments": 0, 
-            "successful_payments": 0, 
-            "pending_payments": 0, 
+            "total_payments": 0,
+            "successful_payments": 0,
+            "pending_payments": 0,
             "success_rate": 0.0,
             "total_volume": 0.0
         }))

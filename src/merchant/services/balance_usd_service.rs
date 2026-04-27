@@ -88,8 +88,13 @@ impl BalanceUsdService {
             .create_balance_summary(balance_tuples, env_str)
             .await;
 
-        log::info!(" Generated USD balance summary for merchant {} ({} env): {} currencies, ${:.2} total", 
-                  merchant_id, env_str, summary.balances.len(), summary.total_usd_value);
+        log::info!(
+            " Generated USD balance summary for merchant {} ({} env): {} currencies, ${:.2} total",
+            merchant_id,
+            env_str,
+            summary.balances.len(),
+            summary.total_usd_value
+        );
 
         Ok(summary)
     }

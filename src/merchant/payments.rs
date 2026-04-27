@@ -1,5 +1,5 @@
-use actix_web::{web, HttpMessage, HttpRequest, HttpResponse, Result};
 use crate::shared::utils::constants;
+use actix_web::{web, HttpMessage, HttpRequest, HttpResponse, Result};
 use chrono::Utc;
 use rust_decimal::Decimal;
 use sea_orm::{
@@ -35,7 +35,7 @@ fn payment_to_response(payment: &payment_request::Model) -> PaymentResponse {
         &payment.amount.to_string(),
         &payment.id,
         &payment.external_id.as_ref().unwrap_or(&String::new()),
-        Some(&payment.environment), 
+        Some(&payment.environment),
     );
 
     use crate::shared::models::usd_pricing::PaymentMetadata;
@@ -105,7 +105,6 @@ pub async fn create_payment_request(
     };
 
     let expires_at = Utc::now() + chrono::Duration::seconds(body.expires_in_seconds as i64);
-
 
     let merchant_environment = crate::merchant::models::merchant::MerchantEnvironmentType::from(
         api_key_record.environment_type.clone(),
@@ -376,7 +375,7 @@ pub async fn list_payment_requests(
             total,
             total_pages,
         },
-        total_volume_usd: None, 
+        total_volume_usd: None,
         volume_breakdown: None,
     };
 
@@ -531,17 +530,15 @@ async fn check_and_update_mainnet_payment(
     let expected_amount = payment.amount.to_string().parse::<f64>().unwrap_or(0.0);
 
     let effective_currency = match payment.environment.as_str() {
-        "testnet" => "base_sepolia", 
-        _ => {
-            match payment.currency.to_lowercase().as_str() {
-                "eth" | "ethereum" => "ethereum",
-                "bnb" => "bnb",
-                "btc" | "bitcoin" => "bitcoin",
-                "sol" | "solana" => "solana",
-                "usdt" | "usdc" => "ethereum", 
-                _ => &payment.currency,
-            }
-        }
+        "testnet" => "base_sepolia",
+        _ => match payment.currency.to_lowercase().as_str() {
+            "eth" | "ethereum" => "ethereum",
+            "bnb" => "bnb",
+            "btc" | "bitcoin" => "bitcoin",
+            "sol" | "solana" => "solana",
+            "usdt" | "usdc" => "ethereum",
+            _ => &payment.currency,
+        },
     };
 
     log::info!(
@@ -595,12 +592,8 @@ async fn check_and_update_mainnet_payment(
                     Ok(updated_payment)
                 }
                 Err(e) => {
-                    log::error!(
-                        " [MAINNET] Failed to update payment {}: {}",
-                        payment.id,
-                        e
-                    );
-                    Ok(payment.clone()) 
+                    log::error!(" [MAINNET] Failed to update payment {}: {}", payment.id, e);
+                    Ok(payment.clone())
                 }
             }
         }
@@ -611,7 +604,7 @@ async fn check_and_update_mainnet_payment(
         }
         Err(e) => {
             log::error!(" [MAINNET] Error checking payment {}: {}", payment.id, e);
-            Ok(payment.clone()) 
+            Ok(payment.clone())
         }
     }
 }
@@ -649,7 +642,7 @@ async fn generate_unique_mainnet_payment_wallet(
     let base_currency_str = match env_type {
         crate::merchant::models::merchant::MerchantEnvironmentType::Testnet => {
             match effective_currency.as_str() {
-                "base_sepolia" => "ethereum", 
+                "base_sepolia" => "ethereum",
                 other => other,
             }
         }
@@ -675,7 +668,6 @@ async fn generate_unique_mainnet_payment_wallet(
 
     Ok(address)
 }
-
 
 pub async fn list_payment_requests_jwt(
     app_state: web::Data<AppState>,

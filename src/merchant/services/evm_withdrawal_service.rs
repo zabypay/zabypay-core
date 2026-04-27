@@ -395,10 +395,7 @@ impl EvmWithdrawalService {
         }
 
         let payments = payment_query.all(db).await?;
-        log::info!(
-            " Found {} total payments matching criteria",
-            payments.len()
-        );
+        log::info!(" Found {} total payments matching criteria", payments.len());
 
         // Debug: Show payment details
         for payment in &payments {

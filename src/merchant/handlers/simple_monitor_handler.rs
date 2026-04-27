@@ -3,7 +3,6 @@ use actix_web::{web, HttpResponse, Result};
 use log;
 use serde_json::json;
 
-
 pub async fn check_payments_now(data: web::Data<AppState>) -> Result<HttpResponse> {
     log::info!(" Manual payment check triggered via API");
 
@@ -26,7 +25,6 @@ pub async fn check_payments_now(data: web::Data<AppState>) -> Result<HttpRespons
         }
     }
 }
-
 
 pub async fn get_simple_monitoring_stats(data: web::Data<AppState>) -> Result<HttpResponse> {
     use crate::shared::entities::{payment_request, prelude::*};

@@ -22,8 +22,7 @@ pub struct CreateWithdrawalRequest {
     #[validate(custom(function = "validate_amount"))]
     pub amount: String,
 
-    pub amount_type: Option<String>, 
-
+    pub amount_type: Option<String>,
 
     #[validate(length(
         min = 1,
@@ -37,7 +36,6 @@ pub struct CreateWithdrawalRequest {
     pub wallet_selection_strategy: Option<String>,
 }
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct WithdrawalResponse {
     pub id: String,
@@ -48,22 +46,22 @@ pub struct WithdrawalResponse {
     pub network: String,
     pub currency: String,
     pub to_address: String,
-    pub amount: String, 
+    pub amount: String,
     pub requested_amount: String,
     pub transferred_amount: String,
-    pub amount_type: String, 
+    pub amount_type: String,
     pub usd_equivalent: Option<String>,
-    pub fee: Option<String>, 
+    pub fee: Option<String>,
     pub total_fee: Option<String>,
     pub net_amount: String,
     pub status: String,
     pub wallets_used: Vec<WalletUsage>,
-    pub tx_hash: Option<String>, 
-    pub tx_hashes: Vec<String>,  
-    pub confirmations: i32, 
+    pub tx_hash: Option<String>,
+    pub tx_hashes: Vec<String>,
+    pub confirmations: i32,
     pub blockchain_confirmations: Option<i32>,
     pub required_confirmations: i32,
-    pub explorer_url: Option<String>, 
+    pub explorer_url: Option<String>,
     pub explorer_urls: Vec<String>,
     pub created_at: DateTime<Utc>,
     pub processed_at: Option<DateTime<Utc>>,
@@ -81,7 +79,7 @@ pub struct WalletUsage {
     pub amount_used: String,
     pub fee_paid: String,
     pub tx_hash: Option<String>,
-    pub status: String, 
+    pub status: String,
     pub balance_before: String,
     pub balance_after: String,
 }
@@ -116,7 +114,7 @@ pub struct WalletBalance {
     pub network: String,
     pub available_balance: String,
     pub usd_value: Option<String>,
-    pub payment_source_id: Option<String>, 
+    pub payment_source_id: Option<String>,
     pub created_at: DateTime<Utc>,
     pub last_transaction_at: Option<DateTime<Utc>>,
 }
@@ -135,7 +133,7 @@ pub struct AggregatedBalance {
 pub struct WithdrawalPlan {
     pub withdrawal_id: String,
     pub requested_amount: String,
-    pub amount_type: String, 
+    pub amount_type: String,
     pub total_available: String,
     pub selected_wallets: Vec<SelectedWallet>,
     pub total_fees_estimated: String,
@@ -143,7 +141,6 @@ pub struct WithdrawalPlan {
     pub can_fulfill: bool,
     pub shortfall_amount: Option<String>,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct SelectedWallet {
@@ -153,7 +150,7 @@ pub struct SelectedWallet {
     pub amount_to_transfer: String,
     pub estimated_fee: String,
     pub net_amount: String,
-    pub order: u32, 
+    pub order: u32,
 }
 
 #[derive(Debug, Clone, Deserialize, Validate)]
@@ -175,17 +172,17 @@ pub struct FeeEstimateRequest {
 pub struct FeeEstimateResponse {
     pub network: String,
     pub currency: String,
-    pub balance: String, 
+    pub balance: String,
     pub estimated_fee: String,
-    pub transferable: String, 
-    pub net_amount: String,   
-    pub decimals: u8,         
+    pub transferable: String,
+    pub net_amount: String,
+    pub decimals: u8,
     pub gas_price: Option<String>,
     pub gas_limit: Option<String>,
-    pub fee_rate: Option<String>, 
-    pub priority: String,        
-    pub estimated_confirmation_time: Option<String>, 
-    pub safety_buffer: Option<String>, 
+    pub fee_rate: Option<String>,
+    pub priority: String,
+    pub estimated_confirmation_time: Option<String>,
+    pub safety_buffer: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Validate)]
@@ -196,7 +193,6 @@ pub struct MaxWithdrawableRequest {
     #[validate(custom(function = "validate_network"))]
     pub network: String,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct MaxWithdrawableResponse {
@@ -209,7 +205,6 @@ pub struct MaxWithdrawableResponse {
     pub gas_limit: Option<String>,
     pub wallets_available: u32,
 }
-
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct WithdrawalListQuery {
@@ -239,7 +234,6 @@ pub struct WithdrawalListResponse {
     pub summary: WithdrawalSummary,
 }
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct PaginationInfo {
     pub page: u64,
@@ -249,7 +243,6 @@ pub struct PaginationInfo {
     pub has_next: bool,
     pub has_prev: bool,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct WithdrawalSummary {
@@ -261,7 +254,6 @@ pub struct WithdrawalSummary {
     pub total_amount_usd: Option<String>,
     pub total_fees_usd: Option<String>,
 }
-
 
 fn validate_environment(environment: &str) -> Result<(), validator::ValidationError> {
     match environment {
@@ -279,7 +271,7 @@ fn validate_network(network: &str) -> Result<(), validator::ValidationError> {
 
 fn validate_amount(amount: &str) -> Result<(), validator::ValidationError> {
     if amount == "max" {
-        return Ok(()); 
+        return Ok(());
     }
 
     match amount.parse::<Decimal>() {
@@ -305,7 +297,7 @@ impl CreateWithdrawalRequest {
             "btc" => "bitcoin",
             "usdt_erc20" => "usdt",
             "usdt_bep20" => "usdt_bnb",
-            "base_eth" => "ethereum", 
+            "base_eth" => "ethereum",
             _ => "unknown",
         }
     }
@@ -316,7 +308,7 @@ impl CreateWithdrawalRequest {
 
     pub fn validate_amount_for_network(&self) -> Result<Decimal, String> {
         if self.is_max_withdrawal() {
-            return Ok(Decimal::ZERO); 
+            return Ok(Decimal::ZERO);
         }
 
         let amount = self
@@ -366,7 +358,6 @@ impl CreateWithdrawalRequest {
     }
 }
 
-
 #[derive(Debug, Clone, Deserialize, Validate)]
 pub struct MultiWalletWithdrawalRequest {
     #[validate(custom(function = "validate_environment"))]
@@ -379,11 +370,10 @@ pub struct MultiWalletWithdrawalRequest {
     ))]
     pub to_address: String,
 
-
     #[validate(custom(function = "validate_amount"))]
     pub amount: String,
 
-    pub amount_type: String, 
+    pub amount_type: String,
 
     pub currency: Option<String>,
 
@@ -399,7 +389,6 @@ pub struct MultiWalletWithdrawalRequest {
     pub wallet_selection_strategy: Option<String>,
 }
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct MultiWalletWithdrawalResponse {
     pub id: String,
@@ -409,7 +398,7 @@ pub struct MultiWalletWithdrawalResponse {
     pub environment: String,
     pub to_address: String,
     pub requested_amount: String,
-    pub requested_amount_type: String, 
+    pub requested_amount_type: String,
     pub transferred_amount_usd: String,
     pub total_fees_usd: String,
     pub net_amount_usd: String,
@@ -424,20 +413,18 @@ pub struct MultiWalletWithdrawalResponse {
     pub updated_at: DateTime<Utc>,
 }
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct WithdrawalTransaction {
     pub wallet_id: String,
     pub wallet_address: String,
     pub currency: String,
-    pub amount: String,     
+    pub amount: String,
     pub fee: String,
-    pub net_amount: String, 
+    pub net_amount: String,
     pub usd_equivalent: String,
     pub tx_hash: Option<String>,
-    pub status: String, 
+    pub status: String,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct WalletSelection {
@@ -450,7 +437,6 @@ pub struct WalletSelection {
     pub estimated_fee: String,
     pub network: String,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct WithdrawalPreview {
@@ -467,14 +453,13 @@ pub struct WithdrawalPreview {
     pub environment: String,
 }
 
-
 #[derive(Debug, Clone, Serialize)]
 pub struct MultiWalletBalanceResponse {
     pub environment: String,
     pub total_wallets: u64,
     pub total_usd_value: String,
     pub wallet_balances: Vec<MultiWalletBalance>,
-    pub currency_totals: HashMap<String, String>, 
+    pub currency_totals: HashMap<String, String>,
     pub last_updated: DateTime<Utc>,
 }
 

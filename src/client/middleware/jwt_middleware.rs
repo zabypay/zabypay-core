@@ -50,15 +50,13 @@ where
             let token = extract_token_from_header(req.request());
 
             match token {
-                Some(token_str) => {
-                    match decode_token(&token_str) {
-                        Ok(claims) => {
-                            req.extensions_mut().insert(claims);
-                            service.call(req).await
-                        }
-                        Err(_) => Err(actix_web::error::ErrorUnauthorized("Invalid token")),
+                Some(token_str) => match decode_token(&token_str) {
+                    Ok(claims) => {
+                        req.extensions_mut().insert(claims);
+                        service.call(req).await
                     }
-                }
+                    Err(_) => Err(actix_web::error::ErrorUnauthorized("Invalid token")),
+                },
                 None => Err(actix_web::error::ErrorUnauthorized(
                     "Authentication required",
                 )),

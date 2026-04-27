@@ -2122,7 +2122,10 @@ impl UniversalAddressMonitor {
                                                     log::warn!(" [USDT_DATA_{}] Invalid data length: {} (expected >= 66)", i, data.len());
                                                 }
                                             } else {
-                                                log::warn!(" [USDT_MISSING_{}] Missing data field in log", i);
+                                                log::warn!(
+                                                    " [USDT_MISSING_{}] Missing data field in log",
+                                                    i
+                                                );
                                             }
                                         } else {
                                             log::warn!(
@@ -2481,8 +2484,11 @@ impl UniversalAddressMonitor {
                                     network: config.name.clone(),
                                 }));
                             } else {
-                                log::debug!(" [SOL_NOMATCH] Amount mismatch - got {} SOL, expected {} SOL", 
-                                    tx.amount, expected_amount);
+                                log::debug!(
+                                    " [SOL_NOMATCH] Amount mismatch - got {} SOL, expected {} SOL",
+                                    tx.amount,
+                                    expected_amount
+                                );
                             }
                         } else {
                             log::debug!(

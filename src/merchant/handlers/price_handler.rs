@@ -10,7 +10,6 @@ use crate::shared::{
     utils::{api_response::ApiResponse, errors::AppError},
 };
 
-
 #[derive(Debug, Deserialize, Validate)]
 pub struct GetPriceRequest {
     #[validate(length(min = 1, max = 20))]
@@ -80,14 +79,13 @@ pub async fn get_usd_price(
         currency: currency.to_uppercase(),
         usd_price: usd_price.to_string(),
         timestamp: chrono::Utc::now(),
-        cache_age_seconds: None, 
+        cache_age_seconds: None,
     };
 
     log::info!("✅ Price response for {}: ${}", currency, usd_price);
 
     Ok(HttpResponse::Ok().json(ApiResponse::success(response, "Price fetched successfully")))
 }
-
 
 pub async fn get_multiple_usd_prices(
     payload: web::Json<GetMultiplePricesRequest>,

@@ -253,10 +253,7 @@ impl EvmMultiWalletService {
             ));
         }
 
-        log::info!(
-            " Found {} potential deposit wallets",
-            deposit_wallets.len()
-        );
+        log::info!(" Found {} potential deposit wallets", deposit_wallets.len());
 
         // Step 2: Evaluate each wallet for transferable balance
         log::info!(
@@ -931,11 +928,7 @@ impl EvmMultiWalletService {
                     remaining_needed -= transfer_amount;
                 }
                 Err(e) => {
-                    log::error!(
-                        " Transfer failed from wallet {}: {}",
-                        candidate.address,
-                        e
-                    );
+                    log::error!(" Transfer failed from wallet {}: {}", candidate.address, e);
                     // Continue with next wallet instead of failing completely
                     continue;
                 }

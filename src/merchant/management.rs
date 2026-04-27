@@ -21,7 +21,6 @@ use crate::merchant::models::merchant::{
 use crate::merchant::services::wallet_generation_service::WalletGenerationService;
 use crate::shared::utils::network_config::{EnvironmentType, NetworkConfigManager};
 
-
 pub async fn create_merchant_handler(
     app_state: web::Data<AppState>,
     req: HttpRequest,
@@ -42,8 +41,8 @@ pub async fn create_merchant_handler(
         merchant_data.webhook_url.is_some()
     );
 
-    let environment_type = MerchantEnvironmentType::Mainnet; 
-    let preferred_networks: Vec<String> = vec![]; 
+    let environment_type = MerchantEnvironmentType::Mainnet;
+    let preferred_networks: Vec<String> = vec![];
 
     let new_merchant = MerchantActiveModel {
         id: Set(uuid::Uuid::new_v4().to_string()),
@@ -78,34 +77,22 @@ pub async fn create_merchant_handler(
             log::error!("Database error creating merchant: {:?}", db_err);
 
             return match &db_err {
-                sea_orm::DbErr::Exec(sea_orm::RuntimeErr::SqlxError(sqlx_err)) => {
-                    match sqlx_err {
-                        sqlx::Error::Database(db_error) => {
-                            let code = db_error.code();
-                            let constraint = db_error.constraint();
+                sea_orm::DbErr::Exec(sea_orm::RuntimeErr::SqlxError(sqlx_err)) => match sqlx_err {
+                    sqlx::Error::Database(db_error) => {
+                        let code = db_error.code();
+                        let constraint = db_error.constraint();
 
-                            log::warn!(
-                                "Database constraint error: code={:?}, constraint={:?}, message={}",
-                                code,
-                                constraint,
-                                db_error.message()
-                            );
+                        log::warn!(
+                            "Database constraint error: code={:?}, constraint={:?}, message={}",
+                            code,
+                            constraint,
+                            db_error.message()
+                        );
 
-                            if let Some(constraint_name) = constraint {
-                                if constraint_name.contains("merchant_name")
-                                    || constraint_name.contains("unique_merchant_name")
-                                {
-                                    return Err(AppError::Conflict(
-                                        json!({
-                                            "code": "merchant_name_conflict",
-                                            "message": "A merchant with this name already exists"
-                                        })
-                                        .to_string(),
-                                    ));
-                                }
-                            }
-
-                            if code.as_ref().map(|c| c.as_ref()) == Some("23505") {
+                        if let Some(constraint_name) = constraint {
+                            if constraint_name.contains("merchant_name")
+                                || constraint_name.contains("unique_merchant_name")
+                            {
                                 return Err(AppError::Conflict(
                                     json!({
                                         "code": "merchant_name_conflict",
@@ -114,18 +101,28 @@ pub async fn create_merchant_handler(
                                     .to_string(),
                                 ));
                             }
-
-                            Err(AppError::DatabaseError(format!(
-                                "Database constraint error: {}",
-                                db_error.message()
-                            )))
                         }
-                        _ => Err(AppError::DatabaseError(format!(
-                            "Database connection error: {}",
-                            sqlx_err
-                        ))),
+
+                        if code.as_ref().map(|c| c.as_ref()) == Some("23505") {
+                            return Err(AppError::Conflict(
+                                json!({
+                                    "code": "merchant_name_conflict",
+                                    "message": "A merchant with this name already exists"
+                                })
+                                .to_string(),
+                            ));
+                        }
+
+                        Err(AppError::DatabaseError(format!(
+                            "Database constraint error: {}",
+                            db_error.message()
+                        )))
                     }
-                }
+                    _ => Err(AppError::DatabaseError(format!(
+                        "Database connection error: {}",
+                        sqlx_err
+                    ))),
+                },
                 sea_orm::DbErr::ConnectionAcquire(_) => Err(AppError::ServiceUnavailable(
                     "Database connection unavailable".to_string(),
                 )),
@@ -343,7 +340,6 @@ pub async fn delete_merchant(
     })))
 }
 
-
 pub async fn create_api_key(
     app_state: web::Data<AppState>,
     req: HttpRequest,
@@ -388,11 +384,11 @@ pub async fn create_api_key(
         key_hash: Set(key_pair.key_hash),
         secret_hash: Set(key_pair.secret_hash),
         key_prefix: Set(key_pair.key_prefix),
-        encrypted_api_key: Set(None),    
-        encrypted_secret_key: Set(None), 
-        api_key: Set(Some(key_pair.api_key.clone())), 
-        secret_key: Set(Some(key_pair.secret_key.clone())), 
-        permissions: Set("[]".to_string()), 
+        encrypted_api_key: Set(None),
+        encrypted_secret_key: Set(None),
+        api_key: Set(Some(key_pair.api_key.clone())),
+        secret_key: Set(Some(key_pair.secret_key.clone())),
+        permissions: Set("[]".to_string()),
         environment_type: Set(String::from(environment_type.clone())),
         expires_at: Set(None),
         is_active: Set(true),
@@ -446,18 +442,16 @@ pub async fn list_api_keys(
 
     let api_key_responses: Vec<ApiKeyResponse> = api_keys
         .into_iter()
-        .map(|key| {
-            ApiKeyResponse {
-                id: key.id,
-                name: key.name,
-                key_prefix: key.key_prefix,
-                api_key: key.api_key,       
-                secret_key: key.secret_key, 
-                environment_type: MerchantEnvironmentType::from(key.environment_type),
-                is_active: key.is_active,
-                created_at: key.created_at.to_rfc3339(),
-                last_used: key.last_used.map(|dt| dt.to_rfc3339()),
-            }
+        .map(|key| ApiKeyResponse {
+            id: key.id,
+            name: key.name,
+            key_prefix: key.key_prefix,
+            api_key: key.api_key,
+            secret_key: key.secret_key,
+            environment_type: MerchantEnvironmentType::from(key.environment_type),
+            is_active: key.is_active,
+            created_at: key.created_at.to_rfc3339(),
+            last_used: key.last_used.map(|dt| dt.to_rfc3339()),
         })
         .collect();
 

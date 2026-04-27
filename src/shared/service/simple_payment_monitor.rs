@@ -43,10 +43,7 @@ impl SimplePaymentMonitor {
 
             // Skip expired payments
             if payment.expires_at <= Utc::now() {
-                log::info!(
-                    " [SIMPLE_MONITOR] Payment {} expired, skipping",
-                    payment.id
-                );
+                log::info!(" [SIMPLE_MONITOR] Payment {} expired, skipping", payment.id);
                 continue;
             }
 

@@ -29,7 +29,6 @@ pub struct MonitoringResponse {
     pub data: Option<serde_json::Value>,
 }
 
-
 #[post("/start")]
 pub async fn start_monitoring_service(
     app_state: web::Data<AppState>,
@@ -40,7 +39,6 @@ pub async fn start_monitoring_service(
         .get("X-API-KEY")
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
-
 
     let monitor_service =
         app_state
@@ -75,7 +73,6 @@ pub async fn stop_monitoring_service(
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
 
-
     let monitor_service =
         app_state
             .payment_monitor
@@ -98,7 +95,6 @@ pub async fn stop_monitoring_service(
     }
 }
 
-
 #[get("/status")]
 pub async fn get_monitoring_status(
     app_state: web::Data<AppState>,
@@ -109,7 +105,6 @@ pub async fn get_monitoring_status(
         .get("X-API-KEY")
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
-
 
     let monitor_service =
         app_state
@@ -135,7 +130,6 @@ pub async fn get_monitoring_status(
     }
 }
 
-
 #[post("/payments/monitor")]
 pub async fn start_monitoring_payment(
     app_state: web::Data<AppState>,
@@ -150,7 +144,6 @@ pub async fn start_monitoring_payment(
         .get("X-API-KEY")
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
-
 
     let monitor_service =
         app_state
@@ -188,7 +181,6 @@ pub async fn start_monitoring_payment(
     }
 }
 
-
 #[delete("/payments/monitor/{tx_hash}")]
 pub async fn stop_monitoring_payment(
     app_state: web::Data<AppState>,
@@ -200,7 +192,6 @@ pub async fn stop_monitoring_payment(
         .get("X-API-KEY")
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
-
 
     let tx_hash = path.into_inner();
     let monitor_service =
@@ -238,7 +229,6 @@ pub async fn manual_payment_check(
         .and_then(|h| h.to_str().ok())
         .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
 
-   
     Ok(HttpResponse::Ok().json(MonitoringResponse {
         success: true,
         message: "Manual payment check triggered. Check logs for results.".to_string(),
@@ -248,7 +238,6 @@ pub async fn manual_payment_check(
         })),
     }))
 }
-
 
 #[get("/health")]
 pub async fn get_monitoring_health(

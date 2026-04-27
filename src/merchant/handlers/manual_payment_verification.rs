@@ -13,7 +13,7 @@ use crate::shared::{
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ManualVerificationRequest {
     pub payment_id: String,
-    pub transaction_hash: Option<String>, 
+    pub transaction_hash: Option<String>,
     pub tx_hash: Option<String>,
     pub force_check: Option<bool>,
 }
@@ -30,7 +30,6 @@ pub struct ManualVerificationResponse {
     pub current_payment_status: String,
     pub actions_taken: Vec<String>,
 }
-
 
 pub async fn verify_payment_manual(
     app_state: web::Data<AppState>,

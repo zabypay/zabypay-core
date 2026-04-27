@@ -42,7 +42,7 @@ impl WithdrawalService {
 
         match currency_without_env.to_lowercase().as_str() {
             "usdt_bnb" => ("usdt_bnb".to_string(), "usdt_bep20".to_string()),
-            "usdt" => ("usdt".to_string(), "usdt_erc20".to_string()),         
+            "usdt" => ("usdt".to_string(), "usdt_erc20".to_string()),
             "eth" => ("eth".to_string(), "eth".to_string()),
             "btc" => ("btc".to_string(), "btc".to_string()),
             "sol" => ("sol".to_string(), "sol".to_string()),
@@ -126,7 +126,6 @@ impl WithdrawalService {
                     Self::extract_currency_and_network(&wallet.currency, environment);
 
                 if base_currency == "usdt" && network_name == "usdt_erc20" {
-                 
                     if let Ok(bnb_usdt_payments) = payment_request::Entity::find()
                         .filter(payment_request::Column::MerchantId.eq(merchant_id))
                         .filter(payment_request::Column::Currency.eq("USDT_BNB"))
@@ -208,7 +207,7 @@ impl WithdrawalService {
         let response = BalancesResponse {
             environment: environment.to_string(),
             balances: balances.clone(),
-            wallet_breakdown: vec![], 
+            wallet_breakdown: vec![],
             total_usd_value: Some(total_usd_value.to_string()),
             total_wallets: balances.len() as u64,
             last_updated,
@@ -222,7 +221,6 @@ impl WithdrawalService {
 
         Ok(response)
     }
-
 
     pub async fn estimate_fee(
         app_state: &AppState,
@@ -241,9 +239,7 @@ impl WithdrawalService {
             .await?
             .ok_or_else(|| AppError::NotFound("Merchant not found".to_string()))?;
 
-
         let balances = Self::get_balances(app_state, merchant_id, &request.environment).await?;
-
 
         let network_balance = balances
             .balances
@@ -278,9 +274,9 @@ impl WithdrawalService {
         let (estimated_fee, gas_price, gas_limit, fee_rate, confirmation_time) =
             Self::calculate_network_fee(&request.network, &request.environment, amount).await?;
 
-        let percentage_buffer = total_balance * "0.001".parse::<Decimal>().unwrap(); 
-        let max_percentage_buffer = total_balance * "0.1".parse::<Decimal>().unwrap(); 
-        let minimum_buffer = "0.000001".parse::<Decimal>().unwrap(); 
+        let percentage_buffer = total_balance * "0.001".parse::<Decimal>().unwrap();
+        let max_percentage_buffer = total_balance * "0.1".parse::<Decimal>().unwrap();
+        let minimum_buffer = "0.000001".parse::<Decimal>().unwrap();
 
         let safety_buffer = std::cmp::min(
             std::cmp::max(percentage_buffer, minimum_buffer),
@@ -332,7 +328,7 @@ impl WithdrawalService {
             gas_price,
             gas_limit,
             fee_rate,
-            priority: "medium".to_string(), 
+            priority: "medium".to_string(),
             estimated_confirmation_time: confirmation_time,
             safety_buffer: Some(safety_buffer.to_string()),
         })
@@ -385,12 +381,12 @@ impl WithdrawalService {
                 let matches_network = b.network.to_lowercase() == request.network.to_lowercase();
                 let matches_currency = b.currency.to_lowercase() == request.network.to_lowercase();
                 let matches_symbol = b.symbol.to_lowercase() == request.network.to_uppercase();
-                
-                log::debug!(" Checking balance: network='{}' currency='{}' symbol='{}' against request='{}'", 
+
+                log::debug!(" Checking balance: network='{}' currency='{}' symbol='{}' against request='{}'",
                            b.network, b.currency, b.symbol, request.network);
-                log::debug!("  matches_network={}, matches_currency={}, matches_symbol={}", 
+                log::debug!("  matches_network={}, matches_currency={}, matches_symbol={}",
                            matches_network, matches_currency, matches_symbol);
-                
+
                 matches_network || matches_currency || matches_symbol
             })
             .ok_or_else(|| {
@@ -398,8 +394,8 @@ impl WithdrawalService {
                     .map(|b| format!("'{}' (currency: '{}', symbol: '{}')", b.network, b.currency, b.symbol))
                     .collect();
                 AppError::ValidationError(format!(
-                    "No balance found for network: '{}'. Available networks: [{}]", 
-                    request.network, 
+                    "No balance found for network: '{}'. Available networks: [{}]",
+                    request.network,
                     available_networks.join(", ")
                 ))
             })?;
@@ -500,14 +496,14 @@ impl WithdrawalService {
                     max_withdrawable: preview.net_amount,
                     total_balance: network_balance.available.clone(),
                     estimated_fee: preview.estimated_gas_fee,
-                    gas_price: None, 
+                    gas_price: None,
                     gas_limit: None,
-                    wallets_available: 1, 
+                    wallets_available: 1,
                 })
             }
             Err(_) => {
                 log::warn!(" ETH multi-wallet service failed, falling back to basic calculation");
-                let fallback_fee = "0.001".parse::<Decimal>().unwrap_or(Decimal::ZERO); 
+                let fallback_fee = "0.001".parse::<Decimal>().unwrap_or(Decimal::ZERO);
                 let max_withdrawable = if total_balance > fallback_fee {
                     total_balance - fallback_fee
                 } else {
@@ -520,7 +516,7 @@ impl WithdrawalService {
                     max_withdrawable: max_withdrawable.to_string(),
                     total_balance: network_balance.available.clone(),
                     estimated_fee: fallback_fee.to_string(),
-                    gas_price: Some("20000000000".to_string()), 
+                    gas_price: Some("20000000000".to_string()),
                     gas_limit: Some("21000".to_string()),
                     wallets_available: 1,
                 })
@@ -655,7 +651,6 @@ impl WithdrawalService {
             request.to_address
         );
 
-
         let environment_currency = format!("{}_{}", currency, request.environment);
         log::info!("Looking for wallet with currency: {}", environment_currency);
 
@@ -664,7 +659,6 @@ impl WithdrawalService {
             "Also checking for wallet with network currency: {}",
             network_environment_currency
         );
-
 
         let network_env_base = format!("{}_{}", request.network, request.environment);
         log::info!(
@@ -764,7 +758,7 @@ impl WithdrawalService {
                                 wallet
                             } else {
                                 return Err(AppError::ValidationError(format!(
-                                            "No {} wallet found for {} environment. Please ensure you have received payments in this currency first.", 
+                                            "No {} wallet found for {} environment. Please ensure you have received payments in this currency first.",
                                             request.network, request.environment
                                         )));
                             }
@@ -810,7 +804,7 @@ impl WithdrawalService {
             Ok(None) => {
                 log::error!("No balance record found for wallet {}", wallet.id);
                 return Err(AppError::NotFound(format!(
-                    "No balance found for {} wallet. Please ensure you have received payments first.", 
+                    "No balance found for {} wallet. Please ensure you have received payments first.",
                     request.network
                 )));
             }
@@ -912,7 +906,6 @@ impl WithdrawalService {
             total_needed
         );
 
-
         let (final_amount, final_net_amount) = if request.network == "sol"
             && balance.available_balance < total_needed
         {
@@ -923,7 +916,7 @@ impl WithdrawalService {
                 .unwrap_or(0);
 
             if shortfall_lamports <= 10_000 && max_withdrawable > Decimal::ZERO {
-                log::info!("🔧 Auto-adjusting Solana withdrawal from {} to {} SOL (shortfall: {} lamports)", 
+                log::info!("🔧 Auto-adjusting Solana withdrawal from {} to {} SOL (shortfall: {} lamports)",
                           amount, max_withdrawable, shortfall_lamports);
                 log::info!(
                     "   Original request: {} SOL + {} SOL fee = {} SOL total",
@@ -962,7 +955,7 @@ impl WithdrawalService {
                 .to_u64()
                 .unwrap_or(0);
 
-            log::error!("Insufficient balance: available={} lamports, needed={} lamports (including {} fee)", 
+            log::error!("Insufficient balance: available={} lamports, needed={} lamports (including {} fee)",
                 balance_lamports, needed_lamports, fee_lamports);
 
             let error_message = if request.network == "sol" {
@@ -970,7 +963,7 @@ impl WithdrawalService {
                 let max_withdrawable_sol = max_withdrawable_lamports as f64 / 1_000_000_000.0;
                 format!(
                     "Insufficient balance: Need {} lamports (including {} fee) but only have {} lamports available. Maximum withdrawable amount: {} lamports ({:.6} SOL)",
-                    needed_lamports, 
+                    needed_lamports,
                     fee_lamports,
                     balance_lamports,
                     max_withdrawable_lamports,
@@ -979,7 +972,7 @@ impl WithdrawalService {
             } else {
                 format!(
                     "Insufficient balance: Need {} lamports (including {} fee) but only have {} lamports available",
-                    needed_lamports, 
+                    needed_lamports,
                     fee_lamports,
                     balance_lamports
                 )
@@ -1001,7 +994,7 @@ impl WithdrawalService {
                 "bitcoin" => 6,
                 "polygon" => 20,
                 "base" => 10,
-                "sol" => 32, 
+                "sol" => 32,
                 _ => 6,
             },
             _ => 6,
@@ -1017,9 +1010,9 @@ impl WithdrawalService {
             network: Set(request.network.clone()),
             currency: Set(currency.clone()),
             to_address: Set(request.to_address.clone()),
-            amount: Set(final_amount), 
+            amount: Set(final_amount),
             fee: Set(Some(estimated_fee)),
-            net_amount: Set(final_net_amount), 
+            net_amount: Set(final_net_amount),
             status: Set("pending".to_string()),
             tx_hash: Set(None),
             blockchain_confirmations: Set(None),
@@ -1069,7 +1062,6 @@ impl WithdrawalService {
 
         log::info!("Withdrawal created successfully, locking funds instead of deducting");
 
-
         let total_lock_amount = final_amount + estimated_fee;
         let new_available_balance = balance.available_balance - total_lock_amount;
         let new_locked_balance = balance.locked_balance + total_lock_amount;
@@ -1086,9 +1078,9 @@ impl WithdrawalService {
         let balance_model = wallet_balance::ActiveModel {
             id: Set(balance.id.clone()),
             available_balance: Set(new_available_balance),
-            pending_balance: Set(balance.pending_balance), 
-            locked_balance: Set(new_locked_balance),      
-            total_balance: Set(balance.total_balance), 
+            pending_balance: Set(balance.pending_balance),
+            locked_balance: Set(new_locked_balance),
+            total_balance: Set(balance.total_balance),
             last_updated: Set(Utc::now().into()),
             ..Default::default()
         };
@@ -1100,17 +1092,17 @@ impl WithdrawalService {
         let transaction = wallet_transaction::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             wallet_id: Set(wallet.id),
-            transaction_type: Set("withdrawal_lock".to_string()), 
+            transaction_type: Set("withdrawal_lock".to_string()),
             currency: Set(currency),
-            amount: Set(final_amount), 
+            amount: Set(final_amount),
             fee: Set(Some(estimated_fee)),
-            net_amount: Set(Decimal::ZERO), 
+            net_amount: Set(Decimal::ZERO),
             balance_before: Set(balance.available_balance),
             balance_after: Set(new_available_balance),
             tx_hash: Set(None),
             from_address: Set(Some(wallet.address)),
             to_address: Set(Some(request.to_address)),
-            status: Set("locked".to_string()), 
+            status: Set("locked".to_string()),
             description: Set(Some(
                 "Withdrawal funds locked - awaiting confirmation".to_string(),
             )),
@@ -1158,7 +1150,7 @@ impl WithdrawalService {
             created_withdrawal.id
         );
 
-        let processing_timeout = tokio::time::Duration::from_secs(30); 
+        let processing_timeout = tokio::time::Duration::from_secs(30);
 
         match tokio::time::timeout(
             processing_timeout,
@@ -1509,7 +1501,7 @@ impl WithdrawalService {
         if let Some(hash) = &withdrawal.tx_hash {
             if !hash.is_empty() && hash != "pending" && hash != "null" && hash != "undefined" {
                 tx_hashes.push(hash.clone());
-                single_tx_hash = Some(hash.clone()); 
+                single_tx_hash = Some(hash.clone());
             }
         }
 
@@ -1615,7 +1607,7 @@ impl WithdrawalService {
             amount: withdrawal.amount.to_string(),
             requested_amount: withdrawal.amount.to_string(),
             transferred_amount: withdrawal.amount.to_string(),
-            amount_type: "crypto".to_string(), 
+            amount_type: "crypto".to_string(),
             usd_equivalent,
             fee: withdrawal.fee.map(|f| {
                 if f >= Decimal::ZERO {
@@ -1634,12 +1626,12 @@ impl WithdrawalService {
             net_amount,
             status: withdrawal.status.clone(),
             wallets_used: vec![],
-            tx_hash: single_tx_hash, 
+            tx_hash: single_tx_hash,
             tx_hashes,
-            confirmations: withdrawal.blockchain_confirmations.unwrap_or(0) as i32, 
+            confirmations: withdrawal.blockchain_confirmations.unwrap_or(0) as i32,
             blockchain_confirmations: withdrawal.blockchain_confirmations,
             required_confirmations: withdrawal.required_confirmations,
-            explorer_url: explorer_urls.first().cloned(), 
+            explorer_url: explorer_urls.first().cloned(),
             explorer_urls,
             created_at: withdrawal.created_at.into(),
             processed_at: withdrawal.processed_at.map(|dt| dt.into()),
@@ -1665,15 +1657,14 @@ impl WithdrawalService {
         ),
         AppError,
     > {
-
         let (fee, gas_price, gas_limit, fee_rate, time) = match network {
             "eth" | "usdt_erc20" => {
                 let base_fee = if environment == "mainnet" {
                     "20000000000"
                 } else {
                     "1000000000"
-                }; 
-                let gas = "21000"; 
+                };
+                let gas = "21000";
                 let fee_wei = Decimal::from_str_exact(base_fee).unwrap()
                     * Decimal::from_str_exact(gas).unwrap();
                 let fee_eth = fee_wei / Decimal::from_str_exact("1000000000000000000").unwrap(); // Convert wei to ETH
@@ -1701,7 +1692,7 @@ impl WithdrawalService {
             }
             "btc" => {
                 let sat_per_byte = if environment == "mainnet" { 20 } else { 10 };
-                let tx_size = 250; 
+                let tx_size = 250;
                 let fee_sats = sat_per_byte * tx_size;
                 let fee_btc = Decimal::from_str_exact(&fee_sats.to_string()).unwrap()
                     / Decimal::from_str_exact("100000000").unwrap();
@@ -1724,11 +1715,11 @@ impl WithdrawalService {
                     "5000000000"
                 } else {
                     "2000000000"
-                }; 
-                let gas = "21000"; 
+                };
+                let gas = "21000";
                 let fee_wei = Decimal::from_str_exact(base_fee).unwrap()
                     * Decimal::from_str_exact(gas).unwrap();
-                let fee_eth = fee_wei / Decimal::from_str_exact("1000000000000000000").unwrap(); 
+                let fee_eth = fee_wei / Decimal::from_str_exact("1000000000000000000").unwrap();
                 (
                     fee_eth,
                     Some(base_fee.to_string()),
@@ -1767,17 +1758,17 @@ impl WithdrawalService {
                     return NetworkInfo {
                         network: "BNB Smart Chain (BEP-20)".to_string(),
                         symbol: "USDT".to_string(),
-                        decimals: 18, 
+                        decimals: 18,
                     };
                 }
                 "usdt_erc20" => {
                     return NetworkInfo {
                         network: "Ethereum (ERC-20)".to_string(),
                         symbol: "USDT".to_string(),
-                        decimals: 6, 
+                        decimals: 6,
                     };
                 }
-                _ => {} 
+                _ => {}
             }
         }
 
@@ -1826,9 +1817,9 @@ impl WithdrawalService {
             "bnb" => "bnb".to_string(),
             "sol" => "solana".to_string(),
             "btc" => "bitcoin".to_string(),
-            "usdt_erc20" => "usdt_erc20".to_string(), 
-            "usdt_bep20" => "usdt_bep20".to_string(), 
-            "base_eth" => "ethereum".to_string(),     
+            "usdt_erc20" => "usdt_erc20".to_string(),
+            "usdt_bep20" => "usdt_bep20".to_string(),
+            "base_eth" => "ethereum".to_string(),
             _ => network.to_string(),
         }
     }
@@ -1842,7 +1833,7 @@ impl WithdrawalService {
             "usdt_erc20" => "USDT (ERC20)".to_string(),
             "usdt_bep20" => "USDT (BEP20)".to_string(),
             "base_eth" => "Base ETH".to_string(),
-            "multi" => "SOL".to_string(), 
+            "multi" => "SOL".to_string(),
             _ => network.to_uppercase(),
         }
     }
@@ -1855,7 +1846,7 @@ impl WithdrawalService {
             "bnb" => "BNB".to_string(),
             "usdt" => "USDT".to_string(),
             "usdt_bnb" => "USDT".to_string(),
-            "multi" => "SOL".to_string(), 
+            "multi" => "SOL".to_string(),
             _ => currency.to_uppercase(),
         }
     }

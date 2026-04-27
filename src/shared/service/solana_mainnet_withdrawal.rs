@@ -554,11 +554,7 @@ impl SolanaMainnetWithdrawal {
         // Get keypair from wallet in database
         log::info!("📝 Getting keypair from wallet: {}", wallet_id);
         let keypair = self.get_keypair_from_wallet(wallet_id).await.map_err(|e| {
-            log::error!(
-                " Failed to get keypair from wallet {}: {:?}",
-                wallet_id,
-                e
-            );
+            log::error!(" Failed to get keypair from wallet {}: {:?}", wallet_id, e);
             e
         })?;
         log::info!(

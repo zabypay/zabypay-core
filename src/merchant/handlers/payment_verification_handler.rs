@@ -41,7 +41,6 @@ pub struct DetectedTransactionInfo {
     pub network: String,
 }
 
-
 pub async fn verify_payment(
     app_state: web::Data<AppState>,
     body: web::Json<VerifyPaymentRequest>,
@@ -179,7 +178,6 @@ pub async fn verify_payment(
     }
 }
 
-
 pub async fn force_check_payment(
     app_state: web::Data<AppState>,
     path: web::Path<String>,
@@ -197,7 +195,6 @@ pub async fn force_check_payment(
     )
     .await
 }
-
 
 pub async fn get_explorer_link(
     query: web::Query<ExplorerLinkQuery>,

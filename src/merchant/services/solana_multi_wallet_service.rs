@@ -82,10 +82,7 @@ impl SolanaMultiWalletService {
             ));
         }
 
-        log::info!(
-            " Found {} potential deposit wallets",
-            deposit_wallets.len()
-        );
+        log::info!(" Found {} potential deposit wallets", deposit_wallets.len());
 
         let candidates = Self::evaluate_wallet_candidates(deposit_wallets).await?;
 
@@ -174,7 +171,6 @@ impl SolanaMultiWalletService {
         Ok(wallets)
     }
 
-
     async fn discover_merchant_wallets(
         db: &DatabaseConnection,
         merchant_id: &str,
@@ -218,7 +214,7 @@ impl SolanaMultiWalletService {
 
         let rent_exempt_minimum = get_rent_exemption_amount(Some(mainnet_rpc))
             .await
-            .unwrap_or(890880); 
+            .unwrap_or(890880);
 
         for wallet in wallets {
             log::info!(" Evaluating wallet: {}", wallet.address);
@@ -234,10 +230,7 @@ impl SolanaMultiWalletService {
             };
 
             if decrypted_mnemonic.is_none() || decrypted_private_key.is_none() {
-                log::warn!(
-                    " Wallet {} missing credentials - skipping",
-                    wallet.address
-                );
+                log::warn!(" Wallet {} missing credentials - skipping", wallet.address);
                 continue;
             }
 
@@ -259,14 +252,14 @@ impl SolanaMultiWalletService {
             let keypair = get_solana_keypair_from_mnemonic(&mnemonic, 0);
             let estimated_fee = match estimate_transfer_fee(
                 &keypair.pubkey(),
-                "11111111111111111111111111111112", 
-                100000,                             
+                "11111111111111111111111111111112",
+                100000,
                 Some(mainnet_rpc),
             )
             .await
             {
                 Ok(fee) => fee,
-                Err(_) => 5000_u64, 
+                Err(_) => 5000_u64,
             };
 
             let transferable_lamports = balance_lamports
@@ -392,11 +385,7 @@ impl SolanaMultiWalletService {
                     remaining_needed -= transfer_amount;
                 }
                 Err(e) => {
-                    log::error!(
-                        " Transfer failed from wallet {}: {}",
-                        candidate.address,
-                        e
-                    );
+                    log::error!(" Transfer failed from wallet {}: {}", candidate.address, e);
                     continue;
                 }
             }

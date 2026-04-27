@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use validator::Validate;
 
-
 #[derive(Debug, Clone, Deserialize, Validate)]
 pub struct CreatePaymentRequest {
     #[validate(length(min = 1, message = "Amount is required"))]
@@ -153,7 +152,6 @@ pub struct ConfirmPaymentRequest {
 
 #[derive(Debug, Serialize)]
 pub struct PaymentListResponse {
-
     pub payments: Vec<PaymentResponse>,
     pub pagination: PaginationInfo,
 
@@ -165,12 +163,11 @@ pub struct PaymentListResponse {
 pub struct VolumeBreakdown {
     pub pending_usd: Decimal,
     pub paid_usd: Decimal,
-    
+
     pub expired_usd: Decimal,
 
     pub failed_usd: Decimal,
 }
-
 
 #[derive(Debug, Serialize)]
 pub struct PaginationInfo {

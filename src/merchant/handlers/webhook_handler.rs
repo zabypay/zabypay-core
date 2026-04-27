@@ -49,7 +49,6 @@ pub struct TestWebhookRequest {
     pub test_data: Option<serde_json::Value>,
 }
 
-
 pub async fn list_webhooks(
     app_state: web::Data<AppState>,
     merchant_id: web::Path<String>,
@@ -101,7 +100,6 @@ pub async fn list_webhooks(
     }))
 }
 
-
 pub async fn get_webhook_details(
     app_state: web::Data<AppState>,
     webhook_id: web::Path<String>,
@@ -142,7 +140,6 @@ pub async fn resend_webhook(
         "message": format!("Webhook {} queued for resend", webhook_id)
     })))
 }
-
 
 pub async fn test_webhook(
     app_state: web::Data<AppState>,

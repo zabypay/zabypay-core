@@ -183,9 +183,7 @@ async fn main() -> std::io::Result<()> {
         Ok(_) => println!("Payment monitoring service started successfully"),
         Err(e) => {
             println!("Payment monitoring service failed to start: {}", e);
-            println!(
-                "You can start it manually via API: POST /api/v1/merchant/monitoring/start"
-            );
+            println!("You can start it manually via API: POST /api/v1/merchant/monitoring/start");
         }
     }
 
@@ -204,7 +202,8 @@ async fn main() -> std::io::Result<()> {
     println!("Monitoring routes: /merchant/monitoring/*");
     println!("Testnet routes: /testnet/*");
 
-    println!("Main API Server starting on http://{}:{}",
+    println!(
+        "Main API Server starting on http://{}:{}",
         constants::ADDRESS.as_str(),
         *constants::PORT
     );
@@ -223,8 +222,7 @@ async fn main() -> std::io::Result<()> {
             )
             .route(
                 "/health",
-                web::get()
-                    .to(|| async { web::Json(ProductionConfig::get_health_check_info()) }),
+                web::get().to(|| async { web::Json(ProductionConfig::get_health_check_info()) }),
             );
 
         if is_production {

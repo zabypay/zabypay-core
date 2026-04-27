@@ -355,11 +355,7 @@ impl PaymentMonitorService {
 
             // Check if payment has expired
             if payment.expires_at <= Utc::now() {
-                log::info!(
-                    " Payment {} expired at {}",
-                    payment.id,
-                    payment.expires_at
-                );
+                log::info!(" Payment {} expired at {}", payment.id, payment.expires_at);
                 if let Err(e) = Self::expire_payment(app_state, &payment).await {
                     log::error!(" Error expiring payment {}: {}", payment.id, e);
                 }
@@ -384,11 +380,7 @@ impl PaymentMonitorService {
                     Self::check_address_for_payment(app_state, blockchain_monitor, config, &payment)
                         .await
                 {
-                    log::error!(
-                        " Error checking address for payment {}: {}",
-                        payment.id,
-                        e
-                    );
+                    log::error!(" Error checking address for payment {}: {}", payment.id, e);
                 }
             }
         }
@@ -1047,11 +1039,7 @@ impl PaymentMonitorService {
                     log::info!("✅ [{}] Successfully updated payment metadata", payment.id);
                 }
                 Err(e) => {
-                    log::error!(
-                        " [{}] Failed to commit payment metadata: {}",
-                        payment.id,
-                        e
-                    );
+                    log::error!(" [{}] Failed to commit payment metadata: {}", payment.id, e);
                     return Err(AppError::DatabaseError(format!(
                         "Metadata commit failed: {}",
                         e
@@ -1059,16 +1047,9 @@ impl PaymentMonitorService {
                 }
             },
             Err(e) => {
-                log::error!(
-                    " [{}] Failed to update payment metadata: {}",
-                    payment.id,
-                    e
-                );
+                log::error!(" [{}] Failed to update payment metadata: {}", payment.id, e);
                 if let Err(rollback_err) = txn.rollback().await {
-                    log::error!(
-                        " Failed to rollback metadata transaction: {}",
-                        rollback_err
-                    );
+                    log::error!(" Failed to rollback metadata transaction: {}", rollback_err);
                 }
                 return Err(e.into());
             }

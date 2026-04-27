@@ -93,7 +93,9 @@ impl ProductionConfig {
 
         if origins == "*" {
             if Self::is_production() {
-                warn!("  CORS is set to allow all origins in production! This should be restricted.");
+                warn!(
+                    "  CORS is set to allow all origins in production! This should be restricted."
+                );
             }
             return vec!["*".to_string()];
         }

@@ -47,7 +47,6 @@ impl WalletGenerationService {
             );
             Ok(wallet.address)
         } else {
-
             Self::generate_new_wallet_sync(
                 db,
                 user_id,
@@ -78,12 +77,10 @@ impl WalletGenerationService {
         env_type: MerchantEnvironmentType,
     ) -> Result<String, AppError> {
         let base_currency_str = match env_type {
-            MerchantEnvironmentType::Testnet => {
-                match effective_currency {
-                    "base_sepolia" => "ethereum", 
-                    other => other,
-                }
-            }
+            MerchantEnvironmentType::Testnet => match effective_currency {
+                "base_sepolia" => "ethereum",
+                other => other,
+            },
             MerchantEnvironmentType::Mainnet => effective_currency,
         };
 
@@ -110,17 +107,15 @@ impl WalletGenerationService {
         env_type: &MerchantEnvironmentType,
     ) -> Result<String, AppError> {
         match env_type {
-            MerchantEnvironmentType::Testnet => {
-                match currency_str.to_lowercase().as_str() {
-                    "ethereum" | "eth" | "usdt" | "usdt_bnb" | "usdt_erc20" | "usdt_bep20"
-                    | "usdc" | "bnb" => Ok("base_sepolia".to_string()),
-                    "bitcoin" | "btc" => Ok("bitcoin".to_string()), 
-                    other => Err(AppError::ValidationError(format!(
-                        "Currency {} not supported on testnet",
-                        other
-                    ))),
-                }
-            }
+            MerchantEnvironmentType::Testnet => match currency_str.to_lowercase().as_str() {
+                "ethereum" | "eth" | "usdt" | "usdt_bnb" | "usdt_erc20" | "usdt_bep20" | "usdc"
+                | "bnb" => Ok("base_sepolia".to_string()),
+                "bitcoin" | "btc" => Ok("bitcoin".to_string()),
+                other => Err(AppError::ValidationError(format!(
+                    "Currency {} not supported on testnet",
+                    other
+                ))),
+            },
             MerchantEnvironmentType::Mainnet => {
                 if NetworkConfigManager::get_network_config_by_environment(
                     currency_str,

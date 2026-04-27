@@ -84,7 +84,6 @@ impl actix_web::FromRequest for MerchantAuth {
                 ));
             }
 
-
             let merchant = &merchants[0];
 
             Ok(MerchantAuth {
@@ -94,7 +93,6 @@ impl actix_web::FromRequest for MerchantAuth {
         })
     }
 }
-
 
 pub async fn get_balances(
     app_state: web::Data<AppState>,
@@ -145,7 +143,6 @@ pub async fn get_balances(
         })));
     }
 
-
     let merchant = &merchants[0];
     log::info!("Using merchant {} for user {}", merchant.id, claims.id);
 
@@ -162,7 +159,6 @@ pub async fn get_balances(
     );
     Ok(HttpResponse::Ok().json(balances))
 }
-
 
 pub async fn create_withdrawal(
     app_state: web::Data<AppState>,
@@ -388,11 +384,9 @@ pub async fn create_withdrawal(
             .await;
         }
         "usdt_erc20" | "usdt" => {
-
             log::warn!("USDT withdrawals are disabled in this build");
             return Err(AppError::ValidationError(
-                "USDT is not enabled in this build. Supported networks: ETH, BNB, SOL."
-                    .to_string(),
+                "USDT is not enabled in this build. Supported networks: ETH, BNB, SOL.".to_string(),
             ));
         }
         "bnb" | "bsc" => {
@@ -407,11 +401,9 @@ pub async fn create_withdrawal(
             .await;
         }
         "usdt_bep20" | "usdt_bnb" => {
-
             log::warn!("USDT (BEP-20) withdrawals are disabled in this build");
             return Err(AppError::ValidationError(
-                "USDT is not enabled in this build. Supported networks: ETH, BNB, SOL."
-                    .to_string(),
+                "USDT is not enabled in this build. Supported networks: ETH, BNB, SOL.".to_string(),
             ));
         }
         "btc" | "bitcoin" => {
@@ -510,11 +502,11 @@ pub async fn create_withdrawal(
         println!("{:?} decrypted_private_key\n", decrypted_private_key);
 
         if decrypted_mnemonic.is_none() || decrypted_private_key.is_none() {
-            log::warn!("Wallet {} missing credentials (mnemonic: {}, private_key: {}) - skipping to next wallet", 
-                      wallet.address, 
-                      decrypted_mnemonic.is_some(), 
+            log::warn!("Wallet {} missing credentials (mnemonic: {}, private_key: {}) - skipping to next wallet",
+                      wallet.address,
+                      decrypted_mnemonic.is_some(),
                       decrypted_private_key.is_some());
-            continue; 
+            continue;
         }
 
         if let (Some(mnemonic), Some(_private_key)) = (&decrypted_mnemonic, &decrypted_private_key)
@@ -587,7 +579,7 @@ pub async fn create_withdrawal(
                 Ok(fee) => fee,
                 Err(e) => {
                     log::error!("Failed to estimate fee: {}", e);
-                    5000_u64 
+                    5000_u64
                 }
             };
 
@@ -596,7 +588,8 @@ pub async fn create_withdrawal(
             let total_cost_sol = total_cost_lamports as f64 / 1_000_000_000.0;
 
             println!("Transaction cost analysis:");
-            println!("Transfer: {} SOL ({} lamports)",
+            println!(
+                "Transfer: {} SOL ({} lamports)",
                 amount_sol, amount_lamports
             );
             println!("   Fee: {} SOL ({} lamports)", fee_sol, estimated_fee);
@@ -608,7 +601,7 @@ pub async fn create_withdrawal(
 
             let rent_minimum_lamports = get_rent_exemption_amount(Some(mainnet_rpc))
                 .await
-                .unwrap_or(890880); 
+                .unwrap_or(890880);
             let rent_minimum_sol = rent_minimum_lamports as f64 / 1_000_000_000.0;
 
             println!(
@@ -633,7 +626,7 @@ pub async fn create_withdrawal(
             if transferable_lamports == 0 || transferable_sol <= 0.0 {
                 log::warn!("Wallet {} has insufficient balance (0 SOL transferable) - checking next wallet...", wallet.address);
                 log::info!("Wallet balance ({} SOL) is too small after fees and rent, moving to next wallet", current_balance_sol);
-                continue; 
+                continue;
             }
 
             let final_amount_lamports;
@@ -664,22 +657,21 @@ pub async fn create_withdrawal(
 
             let withdrawal_id = uuid::Uuid::new_v4().to_string();
 
-
             log::info!("Using merchant_id {} for withdrawal record", merchant.id);
 
             let withdrawal_record = withdrawal_request::ActiveModel {
                 id: sea_orm::Set(withdrawal_id.clone()),
                 merchant_id: sea_orm::Set(merchant.id.clone()),
-                wallet_id: sea_orm::Set(wallet.id.clone()), 
+                wallet_id: sea_orm::Set(wallet.id.clone()),
                 external_id: sea_orm::Set(withdrawal_id.clone()),
                 idempotency_key: sea_orm::Set(request_body.idempotency_key.clone()),
                 environment: sea_orm::Set(request_body.environment.clone()),
                 network: sea_orm::Set(request_body.network.clone()),
                 currency: sea_orm::Set("solana".to_string()),
                 to_address: sea_orm::Set(request_body.to_address.clone()),
-                amount: sea_orm::Set(Decimal::from_f64(final_amount_sol).unwrap_or_default()), 
-                fee: sea_orm::Set(Some(Decimal::from_f64(fee_sol).unwrap_or_default())), 
-                net_amount: sea_orm::Set(Decimal::from_f64(final_amount_sol).unwrap_or_default()), 
+                amount: sea_orm::Set(Decimal::from_f64(final_amount_sol).unwrap_or_default()),
+                fee: sea_orm::Set(Some(Decimal::from_f64(fee_sol).unwrap_or_default())),
+                net_amount: sea_orm::Set(Decimal::from_f64(final_amount_sol).unwrap_or_default()),
                 status: sea_orm::Set("processing".to_string()),
                 required_confirmations: sea_orm::Set(32i32),
                 created_at: sea_orm::Set(chrono::Utc::now().into()),
@@ -706,7 +698,7 @@ pub async fn create_withdrawal(
             let transfer_result = transfer_sol_with_confirmation(
                 &sender_keypair,
                 &request_body.to_address,
-                final_amount_lamports, 
+                final_amount_lamports,
                 Some(mainnet_rpc),
             )
             .await;
@@ -757,7 +749,7 @@ pub async fn create_withdrawal(
                         "to_address": request_body.to_address,
                         "amount": final_amount_sol.to_string(),
                         "fee": fee_sol.to_string(),
-                        "net_amount": final_amount_sol.to_string(), 
+                        "net_amount": final_amount_sol.to_string(),
                         "status": "confirmed",
                         "tx_hash": tx_signature,
                         "blockchain_confirmations": 1,
@@ -802,7 +794,7 @@ pub async fn create_withdrawal(
                         "Transfer failed from wallet {}, trying next wallet if available...",
                         wallet.address
                     );
-                    continue; 
+                    continue;
                 }
             }
         }
@@ -1124,7 +1116,6 @@ pub async fn cancel_withdrawal(
         ));
     }
 
-
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "message": "Withdrawal cancellation requested",
         "withdrawal_id": withdrawal_id
@@ -1179,7 +1170,6 @@ pub async fn debug_wallets(
 
     Ok(HttpResponse::Ok().json(response))
 }
-
 
 async fn handle_usdt_withdrawal(
     app_state: web::Data<AppState>,
@@ -1239,7 +1229,7 @@ async fn handle_usdt_withdrawal(
         &request_body.environment,
         &request_body.to_address,
         &final_amount,
-        "crypto", 
+        "crypto",
         &request_body.idempotency_key,
     )
     .await
@@ -1267,7 +1257,7 @@ async fn handle_usdt_withdrawal(
         Err(AppError::ValidationError(msg)) if msg.starts_with("USDT_") => {
             log::warn!("USDT withdrawal insufficient balance: {}", msg);
             Ok(HttpResponse::BadRequest().json(serde_json::json!({
-                "error": "insufficient_balance", 
+                "error": "insufficient_balance",
                 "message": msg,
                 "code": if msg.contains("ERC20") { "USDT_ERC20_INSUFFICIENT" } else { "USDT_BEP20_INSUFFICIENT" }
             })))
@@ -1348,11 +1338,9 @@ fn convert_usdt_result_to_response(
     )
     .unwrap_or("0".to_string());
 
-    let fee_display = TokenConfigService::base_units_to_amount(
-        &result.total_gas_used.to_string(),
-        18, 
-    )
-    .unwrap_or("0".to_string());
+    let fee_display =
+        TokenConfigService::base_units_to_amount(&result.total_gas_used.to_string(), 18)
+            .unwrap_or("0".to_string());
 
     let mut response = serde_json::Map::new();
     response.insert(
@@ -1415,7 +1403,7 @@ fn convert_usdt_result_to_response(
     response
 }
 
-/// TEST: GET /api/v1/merchant/test/mainnet-balances - Test mainnet balance sync without auth  
+/// TEST: GET /api/v1/merchant/test/mainnet-balances - Test mainnet balance sync without auth
 pub async fn test_mainnet_balance_sync(
     app_state: web::Data<AppState>,
 ) -> Result<HttpResponse, AppError> {
@@ -1434,7 +1422,7 @@ pub async fn test_mainnet_balance_sync(
             match crate::merchant::services::balance_sync_service::BalanceSyncService::sync_wallet_balances_from_payments_for_environment(&app_state, &merchant.id, "mainnet").await {
                 Ok(_) => {
                     log::info!("Mainnet balance sync completed successfully");
-                    
+
                     match crate::merchant::services::WithdrawalService::get_balances(&app_state, &merchant.id, "mainnet").await {
                         Ok(balances) => {
                             Ok(HttpResponse::Ok().json(serde_json::json!({
@@ -1491,7 +1479,7 @@ pub async fn test_balance_sync(app_state: web::Data<AppState>) -> Result<HttpRes
             match crate::merchant::services::balance_sync_service::BalanceSyncService::sync_wallet_balances_from_payments(&app_state, &merchant.id).await {
                 Ok(_) => {
                     log::info!("Balance sync completed successfully");
-                    
+
                     match crate::merchant::services::WithdrawalService::get_balances(&app_state, &merchant.id, "testnet").await {
                         Ok(balances) => {
                             Ok(HttpResponse::Ok().json(serde_json::json!({
@@ -1844,7 +1832,7 @@ pub async fn preview_withdrawal_plan(
     );
 
     let target_amount = if request.is_max_withdrawal() {
-        rust_decimal::Decimal::MAX 
+        rust_decimal::Decimal::MAX
     } else {
         match request.validate_amount_for_network() {
             Ok(amount) => amount,
@@ -2088,7 +2076,7 @@ pub async fn get_withdrawal_details(
                 tx_hashes.push(hash.clone());
             }
 
-            let wallet_usage = vec![]; 
+            let wallet_usage = vec![];
 
             let network = w.network.clone();
             let environment = w.environment.clone();
@@ -2112,17 +2100,17 @@ pub async fn get_withdrawal_details(
                 network: w.network,
                 currency: w.currency,
                 to_address: w.to_address,
-                amount: w.amount.to_string(), 
+                amount: w.amount.to_string(),
                 requested_amount: w.amount.to_string(),
-                transferred_amount: w.amount.to_string(), 
+                transferred_amount: w.amount.to_string(),
                 amount_type: "crypto".to_string(),
-                usd_equivalent: None, 
-                fee: w.fee.map(|f| f.to_string()), 
+                usd_equivalent: None,
+                fee: w.fee.map(|f| f.to_string()),
                 total_fee: w.fee.map(|f| f.to_string()),
                 net_amount: (w.amount - w.fee.unwrap_or_default()).to_string(),
                 status: w.status,
                 wallets_used: wallet_usage,
-                tx_hash: w.tx_hash.clone(), 
+                tx_hash: w.tx_hash.clone(),
                 tx_hashes,
                 confirmations: w.blockchain_confirmations.unwrap_or(0),
                 blockchain_confirmations: w.blockchain_confirmations,
@@ -2131,9 +2119,9 @@ pub async fn get_withdrawal_details(
                     "eth" | "ethereum" => 12,
                     "bnb" | "bsc" => 12,
                     "btc" | "bitcoin" => 6,
-                    _ => 12, 
+                    _ => 12,
                 },
-                explorer_url: explorer_urls.first().cloned(), 
+                explorer_url: explorer_urls.first().cloned(),
                 explorer_urls,
                 created_at: w.created_at.into(),
                 processed_at: w.processed_at.map(|dt| dt.into()),
@@ -2151,7 +2139,6 @@ pub async fn get_withdrawal_details(
         }))),
     }
 }
-
 
 /// GET /api/v1/merchant/multi-wallet/balances?environment=mainnet|testnet (Enhanced)
 pub async fn get_enhanced_multi_wallet_balances(
@@ -2414,15 +2401,15 @@ pub async fn get_enhanced_withdrawal_details(
                 environment: w.environment,
                 to_address: w.to_address,
                 requested_amount: w.amount.to_string(),
-                requested_amount_type: "usd".to_string(), 
+                requested_amount_type: "usd".to_string(),
                 transferred_amount_usd: w.net_amount.to_string(),
                 total_fees_usd: w.fee.unwrap_or_default().to_string(),
                 net_amount_usd: w.net_amount.to_string(),
                 status: w.status,
-                wallets_used: 1, 
+                wallets_used: 1,
                 wallets_failed: 0,
                 tx_hashes: w.tx_hash.into_iter().collect(),
-                transactions: vec![], 
+                transactions: vec![],
                 created_at: w.created_at.into(),
                 processed_at: w.processed_at.map(|dt| dt.into()),
                 confirmed_at: w.confirmed_at.map(|dt| dt.into()),
@@ -2478,22 +2465,22 @@ impl MerchantAuth {
                     "network": request.network,
                     "currency": "solana",
                     "to_address": request.to_address,
-                    "amount": format!("{}", result.total_transferred_lamports as f64 / 1_000_000_000.0), 
+                    "amount": format!("{}", result.total_transferred_lamports as f64 / 1_000_000_000.0),
                     "requested_amount": request.amount,
                     "transferred_amount": format!("{}", result.total_transferred_lamports as f64 / 1_000_000_000.0),
                     "amount_type": "crypto",
-                    "usd_equivalent": null, 
-                    "fee": format!("{}", result.total_fee_lamports as f64 / 1_000_000_000.0), 
+                    "usd_equivalent": null,
+                    "fee": format!("{}", result.total_fee_lamports as f64 / 1_000_000_000.0),
                     "total_fee": format!("{}", result.total_fee_lamports as f64 / 1_000_000_000.0),
                     "net_amount": format!("{}", result.total_transferred_lamports as f64 / 1_000_000_000.0),
                     "status": "confirmed",
                     "wallets_used": result.wallets_used,
-                    "tx_hash": result.tx_hashes.first().cloned(), 
+                    "tx_hash": result.tx_hashes.first().cloned(),
                     "tx_hashes": result.tx_hashes,
-                    "confirmations": 1, 
+                    "confirmations": 1,
                     "blockchain_confirmations": Some(1),
                     "required_confirmations": 32,
-                    "explorer_url": result.explorer_urls.first().cloned(), 
+                    "explorer_url": result.explorer_urls.first().cloned(),
                     "explorer_urls": result.explorer_urls,
                     "multi_wallet": true,
                     "aggregation_method": "solana_deposit_discovery",
@@ -2664,22 +2651,22 @@ impl MerchantAuth {
                     "network": request.network,
                     "currency": request.network.to_uppercase(),
                     "to_address": request.to_address,
-                    "amount": format!("{}", transferred_amount), 
+                    "amount": format!("{}", transferred_amount),
                     "requested_amount": request.amount,
                     "transferred_amount": format!("{}", transferred_amount),
                     "amount_type": "crypto",
-                    "usd_equivalent": null, 
-                    "fee": format!("{}", total_fee), 
+                    "usd_equivalent": null,
+                    "fee": format!("{}", total_fee),
                     "total_fee": format!("{}", total_fee),
                     "net_amount": format!("{}", transferred_amount),
                     "status": "confirmed",
                     "wallets_used": result.wallets_used,
-                    "tx_hash": result.tx_hashes.first().cloned(), 
+                    "tx_hash": result.tx_hashes.first().cloned(),
                     "tx_hashes": result.tx_hashes,
-                    "confirmations": 1, 
+                    "confirmations": 1,
                     "blockchain_confirmations": Some(1),
-                    "required_confirmations": 12, 
-                    "explorer_url": result.explorer_urls.first().cloned(), 
+                    "required_confirmations": 12,
+                    "explorer_url": result.explorer_urls.first().cloned(),
                     "explorer_urls": result.explorer_urls,
                     "multi_wallet": true,
                     "aggregation_method": "evm_deposit_discovery",
@@ -2901,22 +2888,22 @@ impl MerchantAuth {
                     "network": request.network,
                     "currency": "BTC",
                     "to_address": request.to_address,
-                    "amount": format!("{}", transferred_amount), 
+                    "amount": format!("{}", transferred_amount),
                     "requested_amount": request.amount,
                     "transferred_amount": format!("{}", transferred_amount),
                     "amount_type": "crypto",
-                    "usd_equivalent": null, 
-                    "fee": format!("{}", total_fee), 
+                    "usd_equivalent": null,
+                    "fee": format!("{}", total_fee),
                     "total_fee": format!("{}", total_fee),
                     "net_amount": format!("{}", transferred_amount),
                     "status": "confirmed",
                     "wallets_used": result.wallets_used,
-                    "tx_hash": result.tx_hashes.first().cloned(), 
+                    "tx_hash": result.tx_hashes.first().cloned(),
                     "tx_hashes": result.tx_hashes,
-                    "confirmations": 1, 
+                    "confirmations": 1,
                     "blockchain_confirmations": Some(1),
-                    "required_confirmations": 6, 
-                    "explorer_url": result.explorer_urls.first().cloned(), 
+                    "required_confirmations": 6,
+                    "explorer_url": result.explorer_urls.first().cloned(),
                     "explorer_urls": result.explorer_urls,
                     "multi_wallet": true,
                     "aggregation_method": "btc_deposit_discovery",
@@ -3047,7 +3034,7 @@ impl MerchantAuth {
                     "wallets_used": multi_response.wallets_used,
                     "wallets_failed": multi_response.wallets_failed,
                     "tx_hashes": multi_response.tx_hashes,
-                    "multi_wallet": true, 
+                    "multi_wallet": true,
                     "blockchain_confirmations": 1,
                     "required_confirmations": 32,
                     "explorer_urls": multi_response.tx_hashes.iter()
@@ -3117,7 +3104,7 @@ impl MerchantAuth {
             "ethereum" | "eth" => "eth".to_string(),
             "bitcoin" | "btc" => "btc".to_string(),
             "bnb" => "bnb".to_string(),
-            "usdt" => "usdt_erc20".to_string(), 
+            "usdt" => "usdt_erc20".to_string(),
             _ => currency.to_string(),
         }
     }
@@ -3167,7 +3154,6 @@ async fn handle_evm_withdrawal(
                 result.status
             );
 
-
             if let Err(sync_error) = crate::merchant::services::balance_sync_service::BalanceSyncService::sync_wallet_balances_from_payments_for_environment(app_state, &merchant.id, &request.environment).await {
                 log::warn!("Balance sync failed after EVM withdrawal: {:?}", sync_error);
             }
@@ -3181,14 +3167,14 @@ async fn handle_evm_withdrawal(
                 "network": result.network,
                 "currency": result.network,
                 "to_address": request.to_address,
-                "amount": result.amount, 
-                "fee": result.fee, 
-                "net_debit": result.net_debit, 
-                "status": result.status, 
-                "confirmations": result.confirmations, 
+                "amount": result.amount,
+                "fee": result.fee,
+                "net_debit": result.net_debit,
+                "status": result.status,
+                "confirmations": result.confirmations,
                 "required_confirmations": result.required_confirmations,
-                "tx_hashes": result.tx_hashes, 
-                "explorer_urls": result.explorer_urls, 
+                "tx_hashes": result.tx_hashes,
+                "explorer_urls": result.explorer_urls,
                 "wallets_used": result.wallets_used.iter().map(|usage| serde_json::json!({
                     "address": usage.address,
                     "amount_sent": crate::merchant::services::evm_withdrawal_service::EvmWithdrawalService::wei_to_decimal(usage.transferred_wei, 18).unwrap_or_default().to_string(),
@@ -3221,7 +3207,6 @@ async fn handle_evm_withdrawal(
         }
     }
 }
-
 
 async fn handle_btc_withdrawal(
     app_state: &web::Data<AppState>,
@@ -3276,7 +3261,7 @@ async fn handle_btc_withdrawal(
                 status: sea_orm::Set("confirmed".to_string()),
                 tx_hash: sea_orm::Set(Some(result.tx_hash.clone())),
                 blockchain_confirmations: sea_orm::Set(Some(1)),
-                required_confirmations: sea_orm::Set(6), 
+                required_confirmations: sea_orm::Set(6),
                 confirmed_at: sea_orm::Set(Some(chrono::Utc::now().into())),
                 processed_at: sea_orm::Set(Some(chrono::Utc::now().into())),
                 broadcast_at: sea_orm::Set(Some(chrono::Utc::now().into())),
@@ -3358,7 +3343,6 @@ async fn handle_btc_withdrawal(
     }
 }
 
-
 async fn get_wallet_for_network(
     db: &sea_orm::DatabaseConnection,
     user_id: &str,
@@ -3379,7 +3363,6 @@ async fn get_wallet_for_network(
 
     Ok(wallet)
 }
-
 
 pub async fn fix_bnb_usdt_wallet_currencies(
     app_state: web::Data<AppState>,
@@ -3455,8 +3438,8 @@ pub async fn fix_bnb_usdt_wallet_currencies(
 
         if let Some(first_payment) = bnb_usdt_payments.first() {
             if let Err(e) = crate::merchant::services::BalanceSyncService::sync_wallet_balances_from_payments_for_environment(
-                &app_state, 
-                &first_payment.merchant_id, 
+                &app_state,
+                &first_payment.merchant_id,
                 "mainnet"
             ).await {
                 log::warn!("Balance sync failed after wallet fix: {:?}", e);
@@ -3570,7 +3553,6 @@ pub async fn trigger_payment_monitoring(
     app_state: web::Data<AppState>,
 ) -> Result<HttpResponse, AppError> {
     log::info!("🔧 [MANUAL_TRIGGER] Manual payment monitoring trigger");
-
 
     let pending_payments = payment_request::Entity::find()
         .filter(payment_request::Column::Status.eq("pending"))
@@ -3686,7 +3668,6 @@ pub async fn trigger_payment_monitoring(
     })))
 }
 
-
 pub async fn verify_bnb_usdt_transaction(
     app_state: web::Data<AppState>,
     query: web::Query<serde_json::Value>,
@@ -3761,8 +3742,8 @@ pub async fn debug_usdt_bep20_wallet_discovery(
 ) -> Result<HttpResponse, AppError> {
     use crate::merchant::services::evm_multi_wallet_service::EvmMultiWalletService;
 
-    let user_id = "44427cee-f15f-45c6-9075-af352dd5392f"; 
-    let merchant_id = "f5a65b8b-072e-4415-8110-26d43663ca0a"; 
+    let user_id = "44427cee-f15f-45c6-9075-af352dd5392f";
+    let merchant_id = "f5a65b8b-072e-4415-8110-26d43663ca0a";
     let network = "usdt_bep20";
     let environment = "mainnet";
 

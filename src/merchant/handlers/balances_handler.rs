@@ -17,7 +17,6 @@ pub struct BalanceQuery {
     pub environment: Option<String>,
 }
 
-
 #[derive(Debug, Serialize)]
 struct BalancesErrorResponse {
     pub error: String,
@@ -38,11 +37,9 @@ impl From<BalancesError> for BalancesErrorResponse {
     }
 }
 
-
 lazy_static! {
     static ref BALANCES_SERVICE: BalancesService = BalancesService::new();
 }
-
 
 pub async fn get_balances(
     app_state: web::Data<AppState>,
@@ -127,19 +124,17 @@ pub async fn get_balances(
             );
             Ok(HttpResponse::Ok().json(balances))
         }
-        Err(balances_error) => {
-            match balances_error.code.as_str() {
-                "DB_UNAVAILABLE" => Ok(HttpResponse::ServiceUnavailable()
-                    .json(BalancesErrorResponse::from(balances_error))),
-                "DB_SCHEMA_OUT_OF_DATE" => Ok(HttpResponse::ServiceUnavailable()
-                    .json(BalancesErrorResponse::from(balances_error))),
-                "VALIDATION_ERROR" => Ok(
-                    HttpResponse::BadRequest().json(BalancesErrorResponse::from(balances_error))
-                ),
-                _ => Ok(HttpResponse::InternalServerError()
-                    .json(BalancesErrorResponse::from(balances_error))),
+        Err(balances_error) => match balances_error.code.as_str() {
+            "DB_UNAVAILABLE" => Ok(HttpResponse::ServiceUnavailable()
+                .json(BalancesErrorResponse::from(balances_error))),
+            "DB_SCHEMA_OUT_OF_DATE" => Ok(HttpResponse::ServiceUnavailable()
+                .json(BalancesErrorResponse::from(balances_error))),
+            "VALIDATION_ERROR" => {
+                Ok(HttpResponse::BadRequest().json(BalancesErrorResponse::from(balances_error)))
             }
-        }
+            _ => Ok(HttpResponse::InternalServerError()
+                .json(BalancesErrorResponse::from(balances_error))),
+        },
     }
 }
 
@@ -173,7 +168,5 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_empty_balances() {
-
-    }
+    async fn test_empty_balances() {}
 }

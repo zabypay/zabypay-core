@@ -566,11 +566,7 @@ async fn check_and_update_testnet_payment(
                     Ok(updated_payment)
                 }
                 Err(e) => {
-                    log::error!(
-                        " [TESTNET] Failed to update payment {}: {}",
-                        payment.id,
-                        e
-                    );
+                    log::error!(" [TESTNET] Failed to update payment {}: {}", payment.id, e);
                     Ok(payment.clone()) // Return original payment on update failure
                 }
             }
