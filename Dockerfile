@@ -1,5 +1,6 @@
 # --- builder ---
-FROM rust:1.75-slim AS builder
+# Use a recent stable image so it can read Cargo.lock v4 (introduced in 1.78).
+FROM rust:1.82-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config libssl-dev libpq-dev ca-certificates \
