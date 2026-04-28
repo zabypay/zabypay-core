@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  RUST_TOOLCHAIN: "1.85.0"
 
 jobs:
   lint:
@@ -17,9 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain (stable)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: rustfmt, clippy
 
       - name: System deps
@@ -33,10 +35,7 @@ jobs:
       - name: cargo fmt --check
         run: cargo fmt --all -- --check
 
-      # The legacy code carries pre-existing warnings. We deny the
-      # correctness bucket and warn-allow the noisy buckets, plus a few
-      # specific lints that fire in legacy modules (TODO: clean these up
-      # and remove the per-lint allows).
+
       - name: cargo clippy
         run: |
           cargo clippy --all-targets --workspace -- \
@@ -63,8 +62,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain (stable)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
 
       - name: System deps
         run: |
@@ -77,9 +78,6 @@ jobs:
       - name: cargo build
         run: cargo build --workspace --release
 
-  # Tests are not run yet: there is no integration-test suite that doesn't
-  # require a live Postgres + chain RPCs. Add a `test` job here once a
-  # hermetic test suite exists.
 
   docker:
     name: docker image

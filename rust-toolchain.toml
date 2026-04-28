@@ -1,0 +1,6 @@
+# Pin the toolchain so local dev, the Dockerfile, and CI all agree.
+# Bumped to 1.85 because at least one transitive dependency declares
+# `edition = "2024"`, which was stabilized in Rust 1.85.
+[toolchain]
+channel = "1.85.0"
+components = ["rustfmt", "clippy"]
