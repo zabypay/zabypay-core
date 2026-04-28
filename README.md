@@ -1,6 +1,5 @@
 # ZabyPay
 
-[![CI](https://github.com/Parikalp-Bhardwaj/zabypay/actions/workflows/ci.yml/badge.svg)]
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **ZabyPay** is an open-source, self-hostable crypto payment gateway written in
