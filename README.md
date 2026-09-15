@@ -175,8 +175,3 @@ before opening a PR. By contributing you agree that your code will be
 licensed under the MIT License.
 
 
----
-
-## License
-
-[MIT](LICENSE) © [Parikalp Bhardwaj](https://github.com/Parikalp-Bhardwaj) and contributors
